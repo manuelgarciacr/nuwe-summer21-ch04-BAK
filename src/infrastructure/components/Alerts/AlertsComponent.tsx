@@ -23,7 +23,6 @@ const Alerts = (props: IProps, ref: Ref<IAlerts> ) => {
     useImperativeHandle(ref, () => ({ createAlerts }));
     
     const createAlerts = (newAlerts: Alert[]) => {
-console.log("CA", alerts.length, newAlerts.length)
         setAlerts([...alerts, ...newAlerts]);
     }
       
@@ -36,39 +35,44 @@ console.log("CA", alerts.length, newAlerts.length)
         if (!alerts.length)
             return;
 
-console.log("UE")
-        const addInterval = setInterval(() => {
-            const idx = alerts.findIndex(v => !v.isShowed)
-            if (idx >= 0)
+        const idx = alerts.findIndex(v => !v.isShowed)
+        if (idx >= 0) {
+            const addTimeout = setTimeout(() => {
                 alerts[idx].showed=true;
-            setAlerts([...alerts])
-        }, 700);
+                setAlerts([...alerts]);
+                clearTimeout(addTimeout)
+            }, 700)
+        }
+    }, [alerts]);
 
-        //const time = 6000 / alerts.length;
-        // const time = 6000;
-        // const interval = setInterval(() => {
-        //     console.log("DEL", alerts.length, alerts[0].id, time)
-        //     deleteAlert(alerts[0].id);
-        // }, time);
-        
+    useEffect(() => {
+        if (!alerts.length)
+            return;
+
+        const time = alerts[0].msg.length ? 3000 : 1500;
+        const deleteInterval = setInterval(() => {
+            if (alerts.length)
+                deleteAlert(0);
+        }, time);
+    
         return () => {
-            clearInterval(addInterval);
-            // clearInterval(interval)
+            clearInterval(deleteInterval)
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [alerts]);
+    });
 
     return (
         <Container className={`${className ? className : ""} ${classes.renderedAlerts}`}>
             {alerts.map((alert: Alert, idx: number) => {
-console.log("RA", alert.isShowed)
                 return (alert.isShowed &&
                     <MuiAlert className={"alertComponent"} 
                         key={alert.id} 
                         onClose={() => deleteAlert(idx)} 
                         severity={alert.type}>
                         <MuiAlertTitle>{alert.title}</MuiAlertTitle>
-                        {alert.msg}
+                        <ul>
+                            {alert.msg.map((msg, i) => <li key={i}>{msg}</li>)}
+                        </ul>
                     </MuiAlert>
                 )
             })}

@@ -35,106 +35,12 @@ const maxLength = 250 * 1024;
 
 const Main = (props: any) => {
     const classes = useStyles();
-    // const [Dropdown, RenderedAlerts, createAlerts] = useAlerts();
+    const alertsRef = useRef<IAlerts>(null);
     const [googleAuth, setGoogleAuth] = useState<gapi.auth2.GoogleAuth>();
     const [userProfile, setUserProfile] = useState<gapi.auth2.BasicProfile>();
-    // const [alerts, setAlerts] = useState<Alert[]>([]);
     const [files, setFiles] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [isReady, setReady] = useState(false);
-    
-    //  To use a state property inside of a setTimeout
-    // const alertsRef = useRef(alerts);
-    // alertsRef.current = alerts;
-
-    /////////////////////////////////////
-    //
-    // Alerts
-    //
-
-    // type AlertsRefHandle = React.ElementRef<typeof Alerts>;
-    const alertsRef = useRef<IAlerts>(null);
-    
-        /* const Alerts = forwardRef((props: IRenderedAlerts, ref) => {
-        const { className } = props;
-        const [ alerts, setAlerts ] = useState<Alert[]>([]);
-        
-        useImperativeHandle(ref, () => ({
-            createAlerts: (newAlerts: Alert[]) => {
-
-                // const alert = {
-                //     id: uuidv4(),
-                //     type: type,
-                //     title: title,
-                //     msg: <>{msg}</>,
-                //     isShowed: false
-                // };
-console.log("CA", alerts.length, newAlerts.length)        
-                setAlerts([...alerts, ...newAlerts]);
-            },
-            getAlert() {
-              alert("getAlert from Child");
-            }
-        
-          }));
-        
-        return (
-            <Container className={className}>
-                {alerts.map((alert: Alert) => {
-console.log("RA", alert.isShowed)
-                    return (alert.isShowed &&
-                        <MuiAlert className={"alertComponent"} 
-                            key={alert.id} 
-                            // onClose={() => deleteAlert(alert.id)} 
-                            severity={alert.type}>
-                            <MuiAlertTitle>{alert.title}</MuiAlertTitle>
-                            {alert.msg}
-                        </MuiAlert>
-                    )
-                })}
-            </Container>
-        )
-    }); */
-
-    /* const deleteAlert = (id: string) => {
-        const idx = alerts.findIndex(e => e.id === id);
-
-        if (idx < 0)
-            return;
-        alerts.splice(idx, 1);
-        setAlerts([...alerts]);
-    }
-
-    useEffect(() => {
-
-        if (!alerts.length)
-            return;
-console.log("UE")
-        const addInterval = setInterval(() => {
-            const idx = alerts.findIndex(v => !v.isShowed)
-            if (idx >= 0)
-                alerts[idx].showed=true;
-            setAlerts([...alerts])
-        }, 700);
-
-        //const time = 6000 / alerts.length;
-        // const time = 6000;
-        // const interval = setInterval(() => {
-        //     console.log("DEL", alerts.length, alerts[0].id, time)
-        //     deleteAlert(alerts[0].id);
-        // }, time);
-        
-        return () => {
-            clearInterval(addInterval);
-            // clearInterval(interval)
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [alerts]); */
-
-    //
-    // Alerts
-    //
-    /////////////////////////////////////
 
     /////////////////////////////////////
     //
@@ -471,8 +377,6 @@ console.log("UE")
                         </aside>
                     }
                 </Card>
-                <Alerts className={classes.renderedAlerts}
-                    ref={alertsRef}/>
                 {/* <Dropdown className={classes.renderedAlerts}></Dropdown> */}
                 {/* <RenderedAlerts className={classes.renderedAlerts}></RenderedAlerts> */}
                 {/* <div style={{position: "absolute", bottom: 5, right: 50, overflowX: "hidden"}}>{RenderAlerts}</div> */}
@@ -485,7 +389,7 @@ console.log("UE")
                         <Typography>{userProfile.getEmail()}</Typography>
                     </div>
                 }
-<Button onClick={() => {const newAlerts = []; for (let i = 0; i < 3; i++) newAlerts.push(new Alert("success", "Título " + i, ["Mensaje", "Mensaje2"])); alertsRef.current?.createAlerts(newAlerts)}}>ALERTS</Button>                
+<Button onClick={() => {const newAlerts = []; for (let i = 0; i < 3; i++) newAlerts.push(new Alert(i === 1 ? "error" : "success", "Título " + i, i === 1 ? ["Mensaje 1", "Mensaje2"] : undefined)); alertsRef.current?.createAlerts(newAlerts)}}>ALERTS</Button>                
                 <Typography variant="h5">Bienvenido a DDrop</Typography>
                 <Typography className={classes.loginParagraph} variant="subtitle2">Para subir tus archivos de forma simple a drive, puedes hacer Login a través de Google.</Typography>
                 <Divider className={classes.divider}></Divider>
@@ -510,6 +414,8 @@ console.log("UE")
                     cookiePolicy={'single_host_origin'}
                 />,
             </Paper>
+            <Alerts className={classes.renderedAlerts}
+                    ref={alertsRef}/>
         </div>
     )
 }

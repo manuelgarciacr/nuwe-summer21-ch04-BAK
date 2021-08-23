@@ -205,7 +205,21 @@ const useStyles = makeStyles((theme: Theme) =>
             }
         },
         renderedAlerts: {
-            width: "75%!Important",
+            "&.MuiContainer-root": { // !important
+                position: "fixed",
+                marginRight: -16,
+                bottom: 0,
+                right: 0,
+                [theme.breakpoints.up("sm")]: {
+                    width: "75%",
+                },
+            },
+            "&.MuiContainer-root ul": { // !important
+                paddingLeft: 0
+            },
+            "&.MuiContainer-root .MuiAlert-message": { // !important
+                maxWidth: "75%"
+            },
             "& .alertComponent": {
                 // color: "green",
                 "&.MuiAlert-standardSuccess": {
