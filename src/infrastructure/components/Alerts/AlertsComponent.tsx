@@ -1,13 +1,14 @@
 import { forwardRef, Ref, useEffect, useImperativeHandle, useState } from "react";
 
-import Alert from "../Alert/Alert";
+import Alert from "./Alert";
+import useStyles from "./styles";
 
 import Container from "@material-ui/core/Container";
 import MuiAlert from '@material-ui/lab/Alert';
 import MuiAlertTitle from '@material-ui/lab/AlertTitle';
 
 interface IProps {
-    className: string
+    className?: string
 }
 
 export interface IAlerts {
@@ -15,6 +16,7 @@ export interface IAlerts {
 }
 
 const Alerts = (props: IProps, ref: Ref<IAlerts> ) => {
+    const classes = useStyles();
     const { className } = props;
     const [ alerts, setAlerts ] = useState<Alert[]>([]);
 
@@ -24,7 +26,12 @@ const Alerts = (props: IProps, ref: Ref<IAlerts> ) => {
 console.log("CA", alerts.length, newAlerts.length)
         setAlerts([...alerts, ...newAlerts]);
     }
-        
+      
+    const deleteAlert = (id: number) => {
+        alerts.splice(id, 1);
+        setAlerts([...alerts])
+    }
+
     useEffect(() => {
         if (!alerts.length)
             return;
@@ -52,13 +59,13 @@ console.log("UE")
     }, [alerts]);
 
     return (
-        <Container className={className}>
-            {alerts.map((alert: Alert) => {
+        <Container className={`${className ? className : ""} ${classes.renderedAlerts}`}>
+            {alerts.map((alert: Alert, idx: number) => {
 console.log("RA", alert.isShowed)
                 return (alert.isShowed &&
                     <MuiAlert className={"alertComponent"} 
                         key={alert.id} 
-                        // onClose={() => deleteAlert(alert.id)} 
+                        onClose={() => deleteAlert(idx)} 
                         severity={alert.type}>
                         <MuiAlertTitle>{alert.title}</MuiAlertTitle>
                         {alert.msg}

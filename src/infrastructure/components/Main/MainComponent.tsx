@@ -9,7 +9,7 @@ import FileViewer from 'react-file-viewer-extended';
 import useStyles from "./styles";
 import { GoogleIcon } from 'infrastructure/assets/img/GoogleIcon';
 import { DriveIcon } from 'infrastructure/assets/img/DriveIcon'
-import Alert from '../Alert/Alert';
+import Alert from '../Alerts/Alert';
 import Alerts, { IAlerts } from 'infrastructure/components/Alerts/AlertsComponent';
 
 import Button from '@material-ui/core/Button';

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-import Alert from "./Alert";
-import AlertComponent from "./AlertComponent";
+import Alert from "../Alerts/Alert";
+import AlertComponent from "./AlertComponent_REMOVE";
 
 import Container from "@material-ui/core/Container";
 

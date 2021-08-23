@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 
-import Alert from "./Alert";
+import Alert from "../Alerts/Alert";
 
 import MuiAlert from '@material-ui/lab/Alert';
 import MuiAlertTitle from "@material-ui/lab/AlertTitle";

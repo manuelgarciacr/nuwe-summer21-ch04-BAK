@@ -13,6 +13,7 @@ const useStyles = makeStyles((theme: Theme) =>
         dropBoxContainer: {
             flex: 3,
             padding: 32,
+            position: "relative",
             [theme.breakpoints.down("sm")]: {
                 padding: 10,
             },
@@ -56,6 +57,7 @@ const useStyles = makeStyles((theme: Theme) =>
             padding: 32,
             justifyContent: "center",
             alignItems: "center",
+            position: "relative",
             [theme.breakpoints.down("sm")]: {
                 flex: 1,
                 padding: 16,
@@ -202,20 +204,13 @@ const useStyles = makeStyles((theme: Theme) =>
                 position: "absolute",
             }
         },
-        // alert: {
-        //     bottom: 12,
-        //     right: 12,
-        //     transition: "transform .6s ease-in-out!important",
-        //     animation: `$toast-in-right .7s`,
-        // },
         renderedAlerts: {
-            position: "absolute",
-            right: 12,
-            bottom: 12,
+            width: "75%!Important",
             "& .alertComponent": {
-                backgroundColor:"red",
-                transition: "transform .6s ease-in-out!important",
-                animation: `$toast-in-right .7s`
+                // color: "green",
+                "&.MuiAlert-standardSuccess": {
+                    // color: "black"
+                }
             }
         },
         "@keyframes boxShadowActive": {
@@ -244,14 +239,6 @@ const useStyles = makeStyles((theme: Theme) =>
             },
             "100%": {
                 boxShadow: "0 0 5px 2px #fff, 0 0 10px 5px #fca05a",
-            },
-        },
-        "@keyframes toast-in-right": {
-            from: {
-                transform: "translateX(100%)",
-            },
-            to: {
-                transform: "translateX(0)",
             },
         }
     })
