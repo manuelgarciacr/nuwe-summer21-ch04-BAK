@@ -202,11 +202,21 @@ const useStyles = makeStyles((theme: Theme) =>
                 position: "absolute",
             }
         },
-        alert: {
-            bottom: 12,
+        // alert: {
+        //     bottom: 12,
+        //     right: 12,
+        //     transition: "transform .6s ease-in-out!important",
+        //     animation: `$toast-in-right .7s`,
+        // },
+        renderedAlerts: {
+            position: "absolute",
             right: 12,
-            transition: "transform .6s ease-in-out!important",
-            animation: `$toast-in-right .7s`,
+            bottom: 12,
+            "& .alertComponent": {
+                backgroundColor:"red",
+                transition: "transform .6s ease-in-out!important",
+                animation: `$toast-in-right .7s`
+            }
         },
         "@keyframes boxShadowActive": {
             "0%": {

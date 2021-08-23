@@ -1,6 +1,6 @@
-import React from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone'
+
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { GoogleLogin } from 'react-google-login';
@@ -9,17 +9,17 @@ import FileViewer from 'react-file-viewer-extended';
 import useStyles from "./styles";
 import { GoogleIcon } from 'infrastructure/assets/img/GoogleIcon';
 import { DriveIcon } from 'infrastructure/assets/img/DriveIcon'
+import Alert from '../Alert/Alert';
+import Alerts, { IAlerts } from 'infrastructure/components/Alerts/AlertsComponent';
 
-import Paper from "@material-ui/core/Paper";
-import Divider from '@material-ui/core/Divider';
-import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
-import Alert from '@material-ui/lab/Alert';
-import AlertTitle from '@material-ui/lab/AlertTitle';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import Divider from '@material-ui/core/Divider';
+import IconButton from '@material-ui/core/IconButton';
+import Paper from "@material-ui/core/Paper";
+import Typography from '@material-ui/core/Typography';
 
 var  SCOPE  =  'https://www.googleapis.com/auth/drive.file';
 var  discoveryUrl  =  'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
@@ -33,80 +33,70 @@ const SERVER = "https://manuelgc.eu/nodejs";
 const UPLOADS = "https://manuelgc.eu/uploads";
 const maxLength = 250 * 1024;
 
-console.log("PROC", process.env)
-
-const fileSizeValidator = (file: File) => {
-  if (file.size > maxLength) {
-    return {
-      code: "file-too-large",
-      message: `File size is larger than 300k`
-    };
-  }
-
-  return null
-}
-
 const Main = (props: any) => {
     const classes = useStyles();
+    // const [Dropdown, RenderedAlerts, createAlerts] = useAlerts();
     const [googleAuth, setGoogleAuth] = useState<gapi.auth2.GoogleAuth>();
     const [userProfile, setUserProfile] = useState<gapi.auth2.BasicProfile>();
-    const [alerts, setAlerts] = useState<any[]>([]);
+    // const [alerts, setAlerts] = useState<Alert[]>([]);
     const [files, setFiles] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [isReady, setReady] = useState(false);
+    
     //  To use a state property inside of a setTimeout
-    const alertsRef = useRef(alerts);
-    alertsRef.current = alerts;
-    const {
-        // acceptedFiles,
-        fileRejections,
-        getRootProps,
-        getInputProps,
-        isDragActive,
-        isDragAccept,
-        isDragReject
-    } = useDropzone({
-        accept: 'application/vnd.ms-excel, text/plain, .txt, .csv, image/*',
-        maxFiles: 3,
-        validator: fileSizeValidator,
-        onDrop: acceptedFiles => {
-            setLoading(true);
-            setFiles(acceptedFiles.map(file => {
-                console.log("AF", file);
-                onFileUpload(file)
-                Object.assign(file, {
-                    preview: URL.createObjectURL(file)
-                })
-                return file;
-            }));
-            getFiles();
-            setLoading(false);
-        }
-    });
+    // const alertsRef = useRef(alerts);
+    // alertsRef.current = alerts;
 
     /////////////////////////////////////
     //
     // Alerts
     //
 
-    const createAlert = (type: string, title: string, msg: string = "") => {
-        const alert = {
-            id: uuidv4(),
-            type: type,
-            title: title,
-            msg: <>{msg}</>
-        };
-        setAlerts([...alerts, alert]);
-    }
+    // type AlertsRefHandle = React.ElementRef<typeof Alerts>;
+    const alertsRef = useRef<IAlerts>(null);
+    
+        /* const Alerts = forwardRef((props: IRenderedAlerts, ref) => {
+        const { className } = props;
+        const [ alerts, setAlerts ] = useState<Alert[]>([]);
+        
+        useImperativeHandle(ref, () => ({
+            createAlerts: (newAlerts: Alert[]) => {
 
-    const RenderAlerts = alerts.map((alert: any) =>
-        <Alert className={classes.alert} key={alert.id} onClose={() => deleteAlert(alert.id)} severity={alert.type}>
-            <AlertTitle>{alert.title}</AlertTitle>
-            {alert.msg}
-        </Alert>
-    );
+                // const alert = {
+                //     id: uuidv4(),
+                //     type: type,
+                //     title: title,
+                //     msg: <>{msg}</>,
+                //     isShowed: false
+                // };
+console.log("CA", alerts.length, newAlerts.length)        
+                setAlerts([...alerts, ...newAlerts]);
+            },
+            getAlert() {
+              alert("getAlert from Child");
+            }
+        
+          }));
+        
+        return (
+            <Container className={className}>
+                {alerts.map((alert: Alert) => {
+console.log("RA", alert.isShowed)
+                    return (alert.isShowed &&
+                        <MuiAlert className={"alertComponent"} 
+                            key={alert.id} 
+                            // onClose={() => deleteAlert(alert.id)} 
+                            severity={alert.type}>
+                            <MuiAlertTitle>{alert.title}</MuiAlertTitle>
+                            {alert.msg}
+                        </MuiAlert>
+                    )
+                })}
+            </Container>
+        )
+    }); */
 
-    const deleteAlert = (id: string) => {
+    /* const deleteAlert = (id: string) => {
         const idx = alerts.findIndex(e => e.id === id);
 
         if (idx < 0)
@@ -116,20 +106,30 @@ const Main = (props: any) => {
     }
 
     useEffect(() => {
+
         if (!alerts.length)
             return;
+console.log("UE")
+        const addInterval = setInterval(() => {
+            const idx = alerts.findIndex(v => !v.isShowed)
+            if (idx >= 0)
+                alerts[idx].showed=true;
+            setAlerts([...alerts])
+        }, 700);
+
         //const time = 6000 / alerts.length;
-        const time = 6000;
-        const interval = setInterval(() => {
-            console.log("DEL", alerts.length, alerts[0].id, time)
-            deleteAlert(alerts[0].id);
-        }, time);
+        // const time = 6000;
+        // const interval = setInterval(() => {
+        //     console.log("DEL", alerts.length, alerts[0].id, time)
+        //     deleteAlert(alerts[0].id);
+        // }, time);
         
         return () => {
-            clearInterval(interval);
+            clearInterval(addInterval);
+            // clearInterval(interval)
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [alerts]);
+    }, [alerts]); */
 
     //
     // Alerts
@@ -199,30 +199,27 @@ const Main = (props: any) => {
                 body: form,
             }).then((res) => {
                 return res.json();
-            }).then(function (val) {
-                createAlert("success", fileName, "Enviado al Drive");
+            }).then(val => {
+                const alert = new Alert("success", fileName, ["Enviado al Drive"]);
+                alertsRef.current?.createAlerts([alert]);
             }).catch(err => {
-                createAlert("error", fileName, "No se ha podido Enviar al Drive");
+                const alert = new Alert("error", fileName, ["No se ha podido Enviar al Drive"]);
+                alertsRef.current?.createAlerts([alert]);
             });
         });
     }
 
     const responseGoogle = (response: any) => {
-        const alert = {
-            id: uuidv4(),
-            type: "success",
-            title: "Google Authentication Success",
-            msg: <></>
-        }
+        let alert: Alert;
         if (response.error) {
-            alert.type = "error";
-            alert.title = "Google Authentication Error";
-            alert.msg = response.details ? <li key={1}>{response.details}</li> : <></>
+            alert = new Alert("error", "Google Authentication Error", [response.details || ""])
         } else {
+            alert = new Alert("success", "Google Authentication Success");
             signInFunction();
         }
 
-        setAlerts([...alerts, alert]);
+        // setAlerts([...alerts, alert]);
+        alertsRef.current?.createAlerts([alert])
     }
 
     useEffect(() => {
@@ -264,6 +261,56 @@ const Main = (props: any) => {
     // Files
     //
 
+    const fileSizeValidator = (file: File) => {
+        if (file.size > maxLength) {
+            return {
+                code: "file-too-large",
+                message: `File size is larger than 300k`
+            };
+        }
+    
+        return null
+    }
+
+    const {
+        // acceptedFiles,
+        fileRejections,
+        getRootProps,
+        getInputProps,
+        isDragActive,
+        isDragAccept,
+        isDragReject
+    } = useDropzone({
+        accept: 'application/vnd.ms-excel, text/plain, .txt, .csv, image/*',
+        maxFiles: 3,
+        validator: fileSizeValidator,
+        onDrop: acceptedFiles => {
+            setLoading(true);
+            setFiles(acceptedFiles.map(file => {
+// console.log("AF", file);
+                onFileUpload(file)
+                Object.assign(file, {
+                    preview: URL.createObjectURL(file)
+                })
+                return file;
+            }));
+            getFiles();
+            setLoading(false);
+        }
+    });
+    
+    const getFiles = () => {
+        axios.get<any[]>(SERVER + "/upload")
+        .then(res => {
+            setFiles(res.data)
+        })
+        .catch(err => {
+            setFiles([]);
+            const alert = new Alert("error", err.toString()); 
+            alertsRef.current?.createAlerts([alert]);
+        });
+    }
+
     const onFileUpload = (file: File) => {
         // Create an object of formData
         const formData = new FormData();
@@ -277,10 +324,12 @@ const Main = (props: any) => {
         // Send formData object
         axios.post(SERVER + "/upload", formData)
         .then(res => {
-            createAlert("success", file.name);
+            const alert = new Alert("success", file.name); 
+            alertsRef.current?.createAlerts([alert]);
         })
         .catch(err => {
-            createAlert("error", file.name, err.toString());
+            const alert = new Alert("error", file.name, err.toString()); 
+            alertsRef.current?.createAlerts([alert]);
         });
     };
 
@@ -294,26 +343,17 @@ const Main = (props: any) => {
         axios.delete(SERVER + "/upload/" + file)
         .then(res => {
             getFiles();
-            createAlert("success", file + " eliminado");
+            const alert = new Alert("success", file + " eliminado"); 
+            alertsRef.current?.createAlerts([alert]);
         })
         .catch(err => {
-            createAlert("error", file, "No se ha podido eliminar el archivo. " + err.toString());
+            const alert = new Alert("error", file, ["No se ha podido eliminar el archivo. " + err.toString()]); 
+            alertsRef.current?.createAlerts([alert]);
         });
     };
 
-    const getFiles = () => {
-        axios.get<any[]>(SERVER + "/upload")
-        .then(res => {
-            setFiles(res.data)
-        })
-        .catch(err => {
-            setFiles([]);
-            createAlert("error", err.toString());
-        });
-    }
-
     const viewFiles = files.map((file, i) => {
-        console.log("VF", file.type, path.join(UPLOADS, file.name))
+// console.log("VF", file.type, path.join(UPLOADS, file.name))
         return (
             <div className={classes.thumb} key={i}>
                 <IconButton disabled={userProfile ? false : true} className={classes.driveBtn} onClick={(e) => sendFile(e, file.name)} aria-label="Google Drive">
@@ -354,7 +394,8 @@ const Main = (props: any) => {
             newAlerts.push(alert);
             
         });
-        setAlerts([...alerts, ...newAlerts])
+        // setAlerts([...alerts, ...newAlerts])
+        alertsRef.current?.createAlerts(newAlerts)
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[fileRejections])
 
@@ -401,7 +442,7 @@ const Main = (props: any) => {
             var tags = document.getElementsByTagName('script');
             for (let i = tags.length; i >= 0; i--) { //search backwards within nodelist for matching elements to remove
                 if (tags[i] && tags[i].getAttribute('src') != null && tags[i].getAttribute('src') === "https://apis.google.com/js/api.js") {
-                    console.log("DELETE SCRIPT");
+// console.log("DELETE SCRIPT");
                     tags[i].parentNode?.removeChild(tags[i]); //remove element by calling parentNode.removeChild()
                 }
             }
@@ -430,7 +471,11 @@ const Main = (props: any) => {
                         </aside>
                     }
                 </Card>
-                <div style={{position: "absolute", bottom: 5, right: 50, overflowX: "hidden"}}>{RenderAlerts}</div>
+                <Alerts className={classes.renderedAlerts}
+                    ref={alertsRef}/>
+                {/* <Dropdown className={classes.renderedAlerts}></Dropdown> */}
+                {/* <RenderedAlerts className={classes.renderedAlerts}></RenderedAlerts> */}
+                {/* <div style={{position: "absolute", bottom: 5, right: 50, overflowX: "hidden"}}>{RenderAlerts}</div> */}
             </Paper>
             <Paper className={classes.loginContainer}>
                 {userProfile &&
@@ -440,10 +485,10 @@ const Main = (props: any) => {
                         <Typography>{userProfile.getEmail()}</Typography>
                     </div>
                 }
+<Button onClick={() => {const newAlerts = []; for (let i = 0; i < 3; i++) newAlerts.push(new Alert("success", "Título " + i, ["Mensaje", "Mensaje2"])); alertsRef.current?.createAlerts(newAlerts)}}>ALERTS</Button>                
                 <Typography variant="h5">Bienvenido a DDrop</Typography>
                 <Typography className={classes.loginParagraph} variant="subtitle2">Para subir tus archivos de forma simple a drive, puedes hacer Login a través de Google.</Typography>
                 <Divider className={classes.divider}></Divider>
-                
                 <GoogleLogin
                     clientId={CLIENT_ID || ""}
                     render={renderProps => (
